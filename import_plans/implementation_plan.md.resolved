@@ -1,0 +1,111 @@
+# ButlerTimer iOS 앱 구현 계획
+
+본 문서는 ButlerTimer iOS 앱의 아키텍처 및 구현 세부 사항을 요약한 문서입니다. 이 앱은 학생이나 수험생이 문제를 푸는 데 소요되는 시간 및 다음 문제를 선택하기 위해 "문제 이동 또는 선택 시간"을 분리하여 측정하고 통계를 내기 위해 설계되었습니다.
+
+## 요구사항 요약 및 아키텍처 설계
+- **플랫폼**: iOS (모바일 전용)
+- **프레임워크**: SwiftUI (최신 UI 구현) + SwiftData (로컬 데이터 저장소)
+- **아키텍처**: MVVM (Model-View-ViewModel) 패턴 적용
+
+### 핵심 사용자 흐름
+1. **문제 세트 관리**: 사용자는 재사용할 수 있는 문제 "세트(Set)"를 만들 수 있습니다. 문제 개수, 전체 예상 시간, 특정 문제 메타데이터를 입력받습니다. **작성된 세트는 Export 하여 다른 사용자와 공유할 수 있습니다.**
+2. **풀이 세션 실행**: 문제 세트를 시작할 때 "세션(Session)"이 기록됩니다. 각 문제를 풀 때 소요되는 시간과 문제 사이를 이동하며 소모하는 "문제 이동 또는 선택 시간"을 따로 측정합니다.
+3. **결과 분석 및 통계**: 풀이가 끝나면 정답/오답을 입력하고, 문제별 소요 시간, 선택 시간, 전체 스와이프 시간 등을 통계 화면에서 확인하고 이전 풀이 결과와 비교할 수 있습니다.
+
+---
+
+## 사용자 검토 필요 (User Review Required)
+- **로컬 테스트 환경 (Local Testing)**: iOS 로컬 테스트는 macOS 환경의 **Xcode Simulator**를 구동하여 진행합니다. 제가 터미널(CLI) 명령어를 통해 Xcode 프로젝트 빌드 및 시뮬레이터 실행을 자동화하여 띄워드릴 수 있습니다.
+
+---
+
+## 데이터 모델 (SwiftData)
+
+### 1. `QuestionSet` (문제 세트)
+재사용 가능한 문제집 구성을 나타냅니다. (JSON 포맷 등으로 **Export/Import 공유 기능** 지원)
+- `id`: UUID
+- `title`: String (예: "수학 모의고사 1회")
+- `questionCount`: Int (문제 수)
+- `expectedTotalTime`: TimeInterval? (전체 예상 시간, 선택값)
+- `questionMetadatas`: [QuestionMetadata]? (문제별 예상 시간, 난이도, 유형 등 세부 속성)
+- `sessions`: [Session] (1:N 관계)
+
+#### 1-1. `QuestionMetadata` (개별 문항 메타데이터)
+각 문항에 대해 세부 정보를 입력하고 추후 유연하게 구조를 확장하기 위한 모델입니다.
+- `index`: Int (문제 번호)
+- `expectedTime`: TimeInterval? (해당 문항만의 목표 예상 시간)
+- `difficulty`: String? (예: 상, 중, 하 난이도 표기)
+- `questionType`: String? (예: 객관식, 주관식, 서술형 등)
+- `extraData`: [String: String]? (향후 새로운 요구사항이나 메타데이터를 동적으로 추가할 수 있도록 보장하는 유연한 확장 필드)
+
+### 2. `Session` (풀이 세션)
+특정 문제 세트에 대한 한 번의 풀이 시도를 뜻합니다.
+- `id`: UUID
+- `questionSet`: QuestionSet (참조 관계)
+- `dateStarted`: Date (시작 시각)
+- `dateFinished`: Date? (종료 시각)
+- `totalSelectionTime`: TimeInterval (문제 이동 또는 선택에 소요된 전체 시간)
+- `questionResults`: [QuestionResult] (1:N 관계)
+
+### 3. `QuestionResult` (문제별 결과)
+한 세션 내에서 각 문제의 풀이 결과와 걸린 시간을 저장합니다.
+- `id`: UUID
+- `session`: Session (참조 관계)
+- `questionIndex`: Int (1번, 2번 등 문제 번호)
+- `totalSolvingTime`: TimeInterval (이 문제를 풀기 위해 소모된 모든 누적 시간)
+- `isCorrect`: Bool? (nil = 미입력, true = 정답, false = 오답)
+
+---
+
+## 상태 머신 및 타이머 엔진 (Timer Engine)
+
+타이머 로직은 `TimerViewModel`에서 State Machine을 활용해 관리합니다. 어떤 시간에 어떤 데이터가 축적되는지가 핵심입니다.
+
+**상태 (States)**:
+- `.idle` (대기): 세션 시작 전 또는 완료 후 상태.
+- `.selecting` (선택 중): 특정 문제를 풀고 있지 않고 어떤 문제를 풀지 확인/이동 중인 상태. (시간은 `totalSelectionTime`에 가산됨)
+- `.solving(questionIndex)` (풀이 중): 특정 문제를 푸는 상태. (시간은 해당 번호의 `totalSolvingTime`에 누적됨)
+
+**상태 전환 흐름**:
+- `시작(Start)` -> `.selecting` 상태 진입 (또는 첫 문제로 직행 시 `.solving(1)` 전환)
+- `문제 진입(n번)` -> 이전 타이머 누적 중지, 해당 번호의 풀이 시작. 상태는 `.solving(n)`
+- `다른 문제 고르기` -> 현재 문제 타이머 누적 중지, 상태는 `.selecting`으로 전환 (선택 시간 증가 시작)
+- `이전/다음 문제 버튼 클릭` -> 현재 문제 타이머 누적 중지, 바로 앞뒤 번호의 `.solving` 상태로 즉시 전환
+- `완료(Finish)` -> 모든 타이머 중단 확인 후 통계 화면으로 이동
+
+---
+
+## 구현 파일 구조 요약
+
+### Models (데이터 모델)
+#### [NEW] `Models/QuestionSet.swift`
+#### [NEW] `Models/Session.swift`
+#### [NEW] `Models/QuestionResult.swift`
+
+### ViewModels (로직/상태 관리)
+#### [NEW] `ViewModels/QuestionSetViewModel.swift` (세트 목록 조회 및 CRUD 관리)
+#### [NEW] `ViewModels/TimerViewModel.swift` (실시간 타이머 로직 관리)
+#### [NEW] `ViewModels/StatisticsViewModel.swift` (세션 데이터 집계 및 통계 조회)
+
+### Views (UI 화면)
+#### [NEW] `Views/MainTabView.swift` (하단 탭 바 통합 뷰)
+#### [NEW] `Views/HomeDashboardView.swift` (홈 탭 - 이번 주 학습 현황 및 원형/막대 차트 통계 제공)
+#### [NEW] `Views/QuestionSetListView.swift` (문제 세트 탭 - 목록 조회, 스와이프 수정/삭제, 추가 기능 제공)
+#### [NEW] `Views/CreateSetView.swift` (문제 세트 설정 입력 폼)
+#### [NEW] `Views/ActiveSessionView.swift` (메인 타이머 화면)
+- 요구사항에 맞춰 시작, 중지, 이동 등의 **버튼을 매우 크고 누르기 쉽게** 구성 (`.font(.largeTitle)`, 넉넉한 padding 확보).
+- 특정 문제의 번호를 선택하고 이동할 수 있는 리스트 또는 그리드 배열.
+#### [NEW] `Views/SessionSummaryView.swift` (개별 세션 완료 후 통계 및 정답 체크 화면)
+- 풀이 완료 후 정답/오답 입력 및 총합시간/각 턴별 시간 표시.
+#### [NEW] `Views/ComparisonView.swift` (통계 탭 - 여러 회차 데이터 가로 스크롤 비교 표 화면)
+
+## 검증(테스트) 계획
+
+### 로컬 테스트 환경 설정 (Xcode Simulator)
+1. 코드를 작성한 뒤, 의존성 및 프로젝트를 빌드(`xcodebuild` 명령어 사용)합니다.
+2. 현재 설치된 **iOS Simulator** (예: iPhone 16 Pro 시뮬레이터)를 백그라운드에서 실행하고 앱을 설치(`xcrun simctl` 명령어)하여 화면에 띄웁니다.
+3. 시뮬레이터를 통해 직접 UI 화면을 클릭해보며 직관적인 사용성을 검증합니다.
+
+### 자동화/수동 검증 시나리오
+- 동작 시나리오: 특정 단위 문제 모음(예: 3문제) 타이머 실행.
+- Q1 시작 -> 다른 문제 고르기(선택 시간 적립) -> Q2 시작 -> 이전 문제(Q1 돌아감) -> 세션 완료. 프로세스가 요구사항대로 각 문항 번호와 선택 시간에 적절히 누적 배분이 되었는지 검증합니다.
