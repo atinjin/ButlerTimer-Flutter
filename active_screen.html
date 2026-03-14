@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ButlerTimer - Active Session</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4051b5",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#14161e",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between px-4 py-4 bg-white dark:bg-slate-900 border-b border-primary/10">
+<h1 class="text-lg font-bold tracking-tight text-center flex-1">Math Mock Exam 1</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</header>
+<main class="flex-1 flex flex-col max-w-2xl mx-auto w-full p-4 space-y-6">
+<!-- Cumulative Selection Time Section -->
+<section class="flex flex-col items-center justify-center py-6">
+<span class="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/60 mb-6">Cumulative Selection Time</span>
+<div class="flex gap-3 items-center font-display">
+<div class="flex flex-col items-center gap-1">
+<div class="bg-primary/10 dark:bg-primary/20 rounded-2xl px-5 py-4 flex items-center justify-center min-w-[85px]">
+<span class="text-5xl font-black text-primary">00</span>
+</div>
+</div>
+<span class="text-3xl font-bold text-primary/30">:</span>
+<div class="flex flex-col items-center gap-1">
+<div class="bg-primary/10 dark:bg-primary/20 rounded-2xl px-5 py-4 flex items-center justify-center min-w-[85px]">
+<span class="text-5xl font-black text-primary">01</span>
+</div>
+</div>
+<span class="text-3xl font-bold text-primary/30">:</span>
+<div class="flex flex-col items-center gap-1">
+<div class="bg-primary/10 dark:bg-primary/20 rounded-2xl px-5 py-4 flex items-center justify-center min-w-[85px]">
+<span class="text-5xl font-black text-primary">23</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Progress Indicators -->
+<div class="space-y-6">
+<div class="w-full bg-slate-200/50 dark:bg-slate-800 rounded-full h-4 relative overflow-hidden">
+<div class="bg-emerald-500 h-full rounded-full transition-all duration-1000" style="width: 2.7%;"></div>
+<div class="absolute top-1/2 -translate-y-1/2 left-[2.7%] -ml-1 h-2 w-2 rounded-full bg-white shadow-sm"></div>
+</div>
+<section class="bg-white dark:bg-slate-800/50 rounded-2xl p-4 flex gap-4 border border-slate-100 dark:border-slate-700/50 shadow-sm">
+<div class="flex-1 text-center border-2 border-slate-100 dark:border-slate-700 rounded-2xl py-4">
+<p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Est. Time</p>
+<p class="text-xl font-bold text-slate-800 dark:text-slate-200">60:00</p>
+</div>
+<div class="flex-1 text-center border-2 border-emerald-500/10 dark:border-emerald-500/20 rounded-2xl py-4">
+<p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Remaining Time</p>
+<p class="text-xl font-bold text-emerald-500">58:37</p>
+</div>
+</section>
+</div>
+<!-- Filters -->
+<section class="flex flex-wrap gap-2 overflow-x-auto pb-2 scrollbar-hide">
+<button class="px-6 py-2.5 rounded-full text-xs font-bold bg-primary text-white shadow-md">All</button>
+<button class="px-6 py-2.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/30">Completed</button>
+<button class="px-6 py-2.5 rounded-full text-xs font-bold bg-amber-50 text-amber-600 border border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/30">In Progress</button>
+<button class="px-6 py-2.5 rounded-full text-xs font-bold bg-transparent text-slate-400 border-2 border-slate-200 dark:border-slate-700">Unsolved</button>
+</section>
+<!-- Problem Grid -->
+<section class="flex-1">
+<div class="grid grid-cols-3 gap-4">
+<!-- Completed Problems -->
+<button class="aspect-square flex flex-col items-center justify-center bg-emerald-500 text-white rounded-[2rem] shadow-sm active:scale-95 transition-transform">
+<span class="text-4xl font-black">1</span>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[14px] fill-1">check_circle</span>
+<span class="text-[10px] font-bold">02:10</span>
+</div>
+</button>
+<button class="aspect-square flex flex-col items-center justify-center bg-emerald-500 text-white rounded-[2rem] shadow-sm active:scale-95 transition-transform">
+<span class="text-4xl font-black">2</span>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[14px] fill-1">check_circle</span>
+<span class="text-[10px] font-bold">01:45</span>
+</div>
+</button>
+<!-- In Progress Problem -->
+<button class="aspect-square flex flex-col items-center justify-center bg-[#fbc02d] text-amber-950 rounded-[2rem] shadow-lg ring-4 ring-amber-400/20 border-2 border-amber-500/30 active:scale-95 transition-transform">
+<span class="text-5xl font-black">3</span>
+<span class="text-[10px] font-bold uppercase tracking-tight opacity-80 mt-1">In Progress</span>
+</button>
+<!-- Unsolved Problems -->
+<button class="aspect-square flex items-center justify-center bg-white dark:bg-slate-800 text-slate-300 dark:text-slate-600 border-2 border-slate-100 dark:border-slate-700 rounded-[2rem] active:scale-95 transition-transform">
+<span class="font-black text-5xl">4</span>
+</button>
+<button class="aspect-square flex items-center justify-center bg-white dark:bg-slate-800 text-slate-300 dark:text-slate-600 border-2 border-slate-100 dark:border-slate-700 rounded-[2rem] active:scale-95 transition-transform">
+<span class="font-black text-5xl">5</span>
+</button>
+<button class="aspect-square flex items-center justify-center bg-white dark:bg-slate-800 text-slate-300 dark:text-slate-600 border-2 border-slate-100 dark:border-slate-700 rounded-[2rem] active:scale-95 transition-transform">
+<span class="font-black text-5xl">6</span>
+</button>
+<button class="aspect-square flex items-center justify-center bg-white dark:bg-slate-800 text-slate-300 dark:text-slate-600 border-2 border-slate-100 dark:border-slate-700 rounded-[2rem] active:scale-95 transition-transform">
+<span class="font-black text-5xl">7</span>
+</button>
+<button class="aspect-square flex items-center justify-center bg-white dark:bg-slate-800 text-slate-300 dark:text-slate-600 border-2 border-slate-100 dark:border-slate-700 rounded-[2rem] active:scale-95 transition-transform">
+<span class="font-black text-5xl">8</span>
+</button>
+<button class="aspect-square flex items-center justify-center bg-white dark:bg-slate-800 text-slate-300 dark:text-slate-600 border-2 border-slate-100 dark:border-slate-700 rounded-[2rem] active:scale-95 transition-transform">
+<span class="font-black text-5xl">9</span>
+</button>
+</div>
+</section>
+</main>
+<!-- Footer Action -->
+<footer class="p-6 bg-white dark:bg-slate-900 border-t border-primary/10 safe-area-inset-bottom">
+<div class="max-w-2xl mx-auto">
+<button class="w-full bg-primary hover:bg-primary/95 text-white font-bold py-5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.98]">
+<span class="material-symbols-outlined text-[20px] fill-1">stop_circle</span>
+<span class="text-lg">Finish</span>
+</button>
+</div>
+</footer>
+</body></html>

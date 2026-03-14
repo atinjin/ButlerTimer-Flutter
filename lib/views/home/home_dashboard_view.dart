@@ -1,408 +1,504 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 
-class HomeDashboardView extends StatelessWidget {
+class HomeDashboardView extends StatefulWidget {
   const HomeDashboardView({super.key});
 
   @override
+  State<HomeDashboardView> createState() => _HomeDashboardViewState();
+}
+
+class _HomeDashboardViewState extends State<HomeDashboardView> {
+  DateTime _currentMonth = DateTime.now();
+
+  void _previousMonth() {
+    setState(() {
+      _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1);
+    });
+  }
+
+  void _nextMonth() {
+    setState(() {
+      _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1);
+    });
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
+    return months[month - 1];
+  }
+
+  int daysInMonth(int year, int month) {
+    return DateTime(year, month + 1, 0).day;
+  }
+
+  int _getActivityLevel(DateTime date) {
+    DateTime today = DateTime.now();
+    DateTime todayDate = DateTime(today.year, today.month, today.day);
+    if (date.isAfter(todayDate)) return -1;
+    // Just a predictable but varied pattern for UI
+    return ((date.day * 7 + date.month * 3) % 6);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF14161E) : const Color(0xFFF6F6F8);
+    final textColor =
+        isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
+    final cardBgColor =
+        isDark ? const Color(0xFF1E293B).withValues(alpha: 0.5) : Colors.white;
+    const primaryColor = Color(0xFF4051B5);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF000000), // Dark theme base
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF1B4019), // Dark green at top
-              Color(0xFF000000), // Black at bottom
-            ],
-            stops: [0.0, 0.4],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Top Bar (Back button simulated)
-                Row(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new,
-                            color: Colors.white, size: 18),
-                        onPressed: () {},
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // Title Area
-                const Row(
-                  children: [
-                    Icon(Icons.bolt, color: Color(0xFF4ADE80), size: 28),
-                    SizedBox(width: 8),
-                    Text(
-                      'Training Load Ratio',
-                      style: TextStyle(
-                        color: Color(0xFF4ADE80),
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Big Number
-                const Text(
-                  '0.83',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 72,
-                    fontWeight: FontWeight.bold,
-                    height: 1.0,
-                    letterSpacing: -2.0,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Dec 12, 2025',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Description
-                const Text(
-                  'Training load is in its sweet spot. A solid balance of stress and recovery that supports progress with low risk of injury or overtraining.',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    height: 1.5,
-                  ),
-                ),
-
-                const SizedBox(height: 48),
-
-                // Chart Date Selector
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child:
-                          const Icon(Icons.chevron_left, color: Colors.white),
-                    ),
-                    const Text(
-                      'Nov 15 – Dec 12, 2025',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.chevron_right,
-                          color: Colors.white38),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Row(
-                        children: [
-                          Text('4W', style: TextStyle(color: Colors.white)),
-                          SizedBox(width: 4),
-                          Icon(Icons.unfold_more,
-                              color: Colors.white, size: 16),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 32),
-
-                // Chart Widget
-                SizedBox(
-                  height: 240,
-                  child: _buildChart(),
-                ),
-
-                const SizedBox(height: 40),
-
-                // 4-Week Overview
-                Text(
-                  '4-WEEK OVERVIEW',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
-                    fontSize: 12,
-                    letterSpacing: 1.2,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                Row(
-                  children: [
-                    Expanded(
-                        child: _buildOverviewCard(
-                            'Average', '0.92', Icons.calculate_outlined)),
-                    const SizedBox(width: 12),
-                    Expanded(
-                        child: _buildOverviewCard(
-                            'Max', '1.37', Icons.trending_up)),
-                    const SizedBox(width: 12),
-                    Expanded(
-                        child: _buildOverviewCard(
-                            'Workouts', '0.29', Icons.fitness_center)),
-                  ],
-                ),
-                const SizedBox(height: 40),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOverviewCard(String title, String value, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1E),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: Colors.white54, size: 20),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(color: Colors.white54, fontSize: 13),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChart() {
-    return LineChart(
-      LineChartData(
-        minY: 0,
-        maxY: 1.8,
-        minX: 0,
-        maxX: 12,
-        gridData: FlGridData(
-          show: true,
-          drawVerticalLine: false,
-          horizontalInterval: 0.8,
-          getDrawingHorizontalLine: (value) {
-            return FlLine(
-              color: Colors.white.withOpacity(0.1),
-              strokeWidth: 1,
-            );
-          },
-        ),
-        titlesData: FlTitlesData(
-          show: true,
-          topTitles:
-              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 36,
-              interval: 0.5,
-              getTitlesWidget: (value, meta) {
-                if (value == 0.0)
-                  return const Text('0.00',
-                      style: TextStyle(color: Colors.white54, fontSize: 10));
-                if (value == 0.8)
-                  return const Text('0.80',
-                      style: TextStyle(color: Colors.white54, fontSize: 10));
-                if (value == 1.3)
-                  return const Text('1.30',
-                      style: TextStyle(color: Colors.white54, fontSize: 10));
-                if (value == 1.5)
-                  return const Text('1.50',
-                      style: TextStyle(color: Colors.white54, fontSize: 10));
-                return const Text('');
-              },
-            ),
-          ),
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 65,
-              interval: 0.1,
-              getTitlesWidget: (value, meta) {
-                if (value == 0.2)
-                  return const Text('Detraining',
-                      style: TextStyle(color: Colors.white54, fontSize: 10));
-                if (value == 0.8)
-                  return const Text('Optimal',
-                      style: TextStyle(color: Color(0xFF4ADE80), fontSize: 10));
-                if (value == 1.3)
-                  return const Text('Medium R.',
-                      style: TextStyle(color: Colors.white54, fontSize: 10));
-                if (value == 1.6)
-                  return const Text('High Risk',
-                      style: TextStyle(color: Colors.white54, fontSize: 10));
-                return const Text('');
-              },
-            ),
-          ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 32,
-              interval: 3,
-              getTitlesWidget: (value, meta) {
-                switch (value.toInt()) {
-                  case 0:
-                    return const Padding(
-                        padding: EdgeInsets.only(top: 8),
-                        child: Text('16',
-                            style: TextStyle(
-                                color: Colors.white54, fontSize: 11)));
-                  case 3:
-                    return const Padding(
-                        padding: EdgeInsets.only(top: 8),
-                        child: Text('23',
-                            style: TextStyle(
-                                color: Colors.white54, fontSize: 11)));
-                  case 6:
-                    return const Column(children: [
-                      SizedBox(height: 8),
-                      Text('30',
-                          style: TextStyle(
-                              color: Colors.white54,
-                              fontSize: 11,
-                              height: 1.0)),
-                      Text('Dec',
-                          style: TextStyle(
-                              color: Colors.white54, fontSize: 9, height: 1.0))
-                    ]);
-                  case 9:
-                    return const Padding(
-                        padding: EdgeInsets.only(top: 8),
-                        child: Text('7',
-                            style: TextStyle(
-                                color: Colors.white54, fontSize: 11)));
-                }
-                return const Text('');
-              },
-            ),
-          ),
-        ),
-        borderData: FlBorderData(
-          show: true,
-          border: Border(
-            bottom: BorderSide(color: Colors.white.withOpacity(0.2), width: 1),
-            right: BorderSide(color: Colors.white.withOpacity(0.2), width: 1),
-            top: BorderSide.none,
-            left: BorderSide.none,
-          ),
-        ),
-        rangeAnnotations: RangeAnnotations(
-          horizontalRangeAnnotations: [
-            HorizontalRangeAnnotation(
-              y1: 0.8,
-              y2: 1.3,
-              color: const Color(0xFF4ADE80).withOpacity(0.1),
-            ),
-          ],
-        ),
-        extraLinesData: ExtraLinesData(
-          horizontalLines: [
-            HorizontalLine(
-              y: 0.92,
-              color: Colors.white,
-              strokeWidth: 2,
-              label: HorizontalLineLabel(
-                show: true,
-                alignment: Alignment.topLeft,
-                padding: const EdgeInsets.only(bottom: 4, left: 4),
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14),
-                labelResolver: (line) => '0.92',
+      backgroundColor: bgColor,
+      appBar: AppBar(
+        titleSpacing: 24,
+        backgroundColor: isDark
+            ? const Color(0xFF14161E).withValues(alpha: 0.8)
+            : const Color(0xFFF6F6F8).withValues(alpha: 0.8),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Row(
+          children: [
+            const Icon(Icons.timer, color: primaryColor, size: 28),
+            const SizedBox(width: 8),
+            Text(
+              'ButlerTimer',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+                letterSpacing: -0.5,
               ),
             ),
           ],
         ),
-        lineBarsData: [
-          LineChartBarData(
-            spots: const [
-              FlSpot(0, 0.4),
-              FlSpot(1, 0.2),
-              FlSpot(1.5, 1.6),
-              FlSpot(2.5, 0.6),
-              FlSpot(3, 0.4),
-              FlSpot(3.5, 1.2),
-              FlSpot(4.5, 0.6),
-              FlSpot(5, 1.4),
-              FlSpot(6, 0.8),
-              FlSpot(6.5, 0.5),
-              FlSpot(7, 1.0),
-              FlSpot(7.5, 0.6),
-              FlSpot(8.5, 1.5),
-              FlSpot(10, 0.3),
-              FlSpot(10.5, 0.9),
-              FlSpot(11, 0.6),
-              FlSpot(11.8, 0.83),
-            ],
-            isCurved: false,
-            color: Colors.white.withOpacity(0.6),
-            barWidth: 2,
-            isStrokeCapRound: true,
-            dotData: FlDotData(
-              show: true,
-              checkToShowDot: (spot, barData) {
-                return spot.x == 11.8;
-              },
-              getDotPainter: (spot, percent, barData, index) {
-                return FlDotCirclePainter(
-                  radius: 6,
-                  color: const Color(0xFF4ADE80),
-                  strokeWidth: 3,
-                  strokeColor: Colors.black,
-                );
-              },
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 24),
+            decoration: BoxDecoration(
+              color: primaryColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
             ),
-            belowBarData: BarAreaData(show: false),
+            child: IconButton(
+              icon: const Icon(Icons.notifications, color: primaryColor),
+              onPressed: () {},
+            ),
           ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(
+            color: primaryColor.withValues(alpha: 0.1),
+            height: 1.0,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Study Progress Section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Monthly Study Progress",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text(
+                    'Details',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: primaryColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Heatmap Card
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: cardBgColor,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: primaryColor.withValues(alpha: 0.05)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Month Navigator
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.chevron_left),
+                        color: textColor,
+                        onPressed: _previousMonth,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                      Text(
+                        '${_getMonthName(_currentMonth.month)} ${_currentMonth.year}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.chevron_right),
+                        color: textColor,
+                        onPressed: _nextMonth,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Heatmap Grid
+                  _buildHeatmapDayLabels(),
+                  const SizedBox(height: 8),
+                  _buildMonthlyHeatmapGrid(),
+
+                  const SizedBox(height: 24),
+
+                  // Legend
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      const Text(
+                        'LESS',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF94A3B8),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      _buildHeatmapCell(0, smallLegend: true),
+                      const SizedBox(width: 6),
+                      _buildHeatmapCell(2, smallLegend: true),
+                      const SizedBox(width: 6),
+                      _buildHeatmapCell(3, smallLegend: true),
+                      const SizedBox(width: 6),
+                      _buildHeatmapCell(5, smallLegend: true),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'MORE',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF94A3B8),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // Recent Summary Section
+            Text(
+              "Recent Summary",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Stat Cards
+            _buildStatCard(
+              isDark: isDark,
+              textColor: textColor,
+              cardBgColor: cardBgColor,
+              primaryColor: primaryColor,
+              icon: Icons.menu_book,
+              iconColor: const Color(0xFF2563EB), // blue-600
+              iconBgColor:
+                  const Color(0xFF3B82F6).withValues(alpha: 0.1), // blue-500/10
+              title: "Today's Problems",
+              value: "35",
+              trailing: const Row(
+                children: [
+                  Icon(Icons.trending_up, color: Color(0xFF22C55E), size: 16),
+                  SizedBox(width: 4),
+                  Text('+5',
+                      style: TextStyle(
+                          color: Color(0xFF22C55E),
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            _buildStatCard(
+              isDark: isDark,
+              textColor: textColor,
+              cardBgColor: cardBgColor,
+              primaryColor: primaryColor,
+              icon: Icons.hourglass_top,
+              iconColor: const Color(0xFFD97706), // amber-600
+              iconBgColor: const Color(0xFFF59E0B)
+                  .withValues(alpha: 0.1), // amber-500/10
+              title: "Cumulative Selection",
+              value: "10m 20s",
+            ),
+            const SizedBox(height: 16),
+
+            _buildStatCard(
+              isDark: isDark,
+              textColor: textColor,
+              cardBgColor: cardBgColor,
+              primaryColor: primaryColor,
+              icon: Icons.verified,
+              iconColor: primaryColor,
+              iconBgColor: primaryColor.withValues(alpha: 0.1),
+              title: "Avg. Accuracy",
+              value: "75%",
+              trailing: SizedBox(
+                width: 64,
+                height: 8,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: 0.75,
+                    backgroundColor: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFE2E8F0),
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(primaryColor),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 48),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeatmapDayLabels() {
+    final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 7,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 0,
+        childAspectRatio: 2.0, // wider to fit text nicely
+      ),
+      itemCount: 7,
+      itemBuilder: (context, index) {
+        return Center(
+          child: Text(
+            days[index],
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF94A3B8), // slate-400
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMonthlyHeatmapGrid() {
+    int year = _currentMonth.year;
+    int month = _currentMonth.month;
+    int totalDays = daysInMonth(year, month);
+    DateTime firstDay = DateTime(year, month, 1);
+    int firstWeekday = firstDay.weekday; // 1 = Monday, 7 = Sunday
+
+    // empty blocks before the 1st
+    int emptyPrefix = firstWeekday - 1;
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 7,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
+      itemCount: emptyPrefix + totalDays,
+      itemBuilder: (context, index) {
+        if (index < emptyPrefix) {
+          return const SizedBox();
+        }
+        DateTime date = DateTime(year, month, index - emptyPrefix + 1);
+        int level = _getActivityLevel(date);
+        bool isToday = date.year == DateTime.now().year &&
+            date.month == DateTime.now().month &&
+            date.day == DateTime.now().day;
+        return _buildHeatmapCell(level, isToday: isToday, day: date.day);
+      },
+    );
+  }
+
+  Widget _buildHeatmapCell(int level,
+      {bool isToday = false, bool smallLegend = false, int? day}) {
+    // For GridView, Layout delegate controls the size.
+    // For Legend, we constraint it to small specific dimensions.
+    Widget cell = Container(
+      decoration: BoxDecoration(
+        color: _getHeatmapColor(level),
+        borderRadius: BorderRadius.circular(4),
+        border: isToday
+            ? Border.all(color: const Color(0x7DEF4444), width: 2)
+            : null,
+      ),
+      child: (day != null && !smallLegend)
+          ? Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 4.0, top: 4.0),
+                child: Text(
+                  '$day',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: level == -1
+                        ? const Color(0xFF94A3B8).withValues(alpha: 0.5)
+                        : (level >= 3
+                            ? Colors.white.withValues(alpha: 0.9)
+                            : const Color(0xFF94A3B8)), // slate-400
+                  ),
+                ),
+              ),
+            )
+          : null,
+    );
+
+    if (smallLegend) {
+      return SizedBox(width: 14, height: 14, child: cell);
+    }
+    return cell;
+  }
+
+  Color _getHeatmapColor(int level) {
+    if (level == -1) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      return isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0); // slate-700 : slate-200
+    }
+    switch (level) {
+      case 0:
+        return const Color(0xFFFEF2F2); // red-50
+      case 1:
+        return const Color(0xFFFEE2E2); // red-100
+      case 2:
+        return const Color(0xFFFECACA); // red-200
+      case 3:
+        return const Color(0xFFF87171); // red-400
+      case 4:
+        return const Color(0xFFEF4444); // red-500
+      case 5:
+        return const Color(0xFFDC2626); // red-600
+      default:
+        return const Color(0xFFFEF2F2);
+    }
+  }
+
+  Widget _buildStatCard({
+    required bool isDark,
+    required Color textColor,
+    required Color cardBgColor,
+    required Color primaryColor,
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBgColor,
+    required String title,
+    required String value,
+    Widget? trailing,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: cardBgColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.05)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: iconBgColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: iconColor),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF64748B), // slate-500
+                  ),
+                ),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (trailing != null) trailing,
         ],
       ),
     );

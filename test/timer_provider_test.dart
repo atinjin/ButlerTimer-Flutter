@@ -1,13 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:butler_timer/providers/timer_provider.dart';
 import 'package:butler_timer/models/question_set.dart';
-import 'dart:async';
 
 void main() {
   group('TimerNotifier State Machine Tests', () {
     test('Session starts in selecting state with initial values', () {
       final notifier = TimerNotifier();
-      final qSet = QuestionSet()..title = 'Math'..questionCount = 3;
+      final qSet = QuestionSet()
+        ..title = 'Math'
+        ..questionCount = 3;
 
       notifier.startSession(qSet);
 
@@ -40,9 +41,9 @@ void main() {
 
       notifier.startSession(qSet);
       notifier.selectQuestion(1);
-      
+
       expect(notifier.state.status, TimerState.solving);
-      
+
       notifier.pauseToSelect();
 
       expect(notifier.state.status, TimerState.selecting);

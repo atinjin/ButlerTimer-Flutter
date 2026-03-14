@@ -9,7 +9,7 @@ class SessionSummaryView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(timerProvider);
     final qSet = state.currentSet;
-    
+
     if (qSet == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('결과 분석 에러')),
@@ -17,7 +17,8 @@ class SessionSummaryView extends ConsumerWidget {
       );
     }
 
-    final double totalSolvingSec = state.solvingTimeSecByQuestion.values.fold(0, (a, b) => a + b);
+    final double totalSolvingSec =
+        state.solvingTimeSecByQuestion.values.fold(0, (a, b) => a + b);
     final double totalSelectionSec = state.selectingTimeSec;
     final double totalSec = totalSolvingSec + totalSelectionSec;
 
@@ -36,19 +37,20 @@ class SessionSummaryView extends ConsumerWidget {
           children: [
             Text(
               '${qSet.title} (${DateTime.now().toString().substring(0, 16)})',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: Colors.grey),
             ),
             const SizedBox(height: 24),
-
-            _buildSummaryBox(context, totalSec, totalSolvingSec, totalSelectionSec),
-            
+            _buildSummaryBox(
+                context, totalSec, totalSolvingSec, totalSelectionSec),
             const SizedBox(height: 24),
             const Divider(),
             const SizedBox(height: 16),
-            
-            Text('문항별 기록 및 오답 채점', style: Theme.of(context).textTheme.titleLarge),
+            Text('문항별 기록 및 오답 채점',
+                style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
-            
             _buildResultList(context, state),
           ],
         ),
@@ -56,21 +58,26 @@ class SessionSummaryView extends ConsumerWidget {
     );
   }
 
-  Widget _buildSummaryBox(BuildContext context, double total, double solving, double selection) {
+  Widget _buildSummaryBox(
+      BuildContext context, double total, double solving, double selection) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('[ 종합 기록 ]', style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text('[ 종합 기록 ]',
+              style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          Text('총 소모 시간: ${_formatDuration(total)}', style: const TextStyle(fontSize: 16)),
-          Text('- 순수 풀이 시간: ${_formatDuration(solving)}', style: const TextStyle(fontSize: 16)),
-          Text('- 문제 선택 시간: ${_formatDuration(selection)}', style: const TextStyle(fontSize: 16)),
+          Text('총 소모 시간: ${_formatDuration(total)}',
+              style: const TextStyle(fontSize: 16)),
+          Text('- 순수 풀이 시간: ${_formatDuration(solving)}',
+              style: const TextStyle(fontSize: 16)),
+          Text('- 문제 선택 시간: ${_formatDuration(selection)}',
+              style: const TextStyle(fontSize: 16)),
         ],
       ),
     );
@@ -92,17 +99,23 @@ class SessionSummaryView extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
             children: [
-              SizedBox(width: 40, child: Text('$qIdx번', style: const TextStyle(fontWeight: FontWeight.bold))),
+              SizedBox(
+                  width: 40,
+                  child: Text('$qIdx번',
+                      style: const TextStyle(fontWeight: FontWeight.bold))),
               Expanded(
                 child: Text(
                   hasSkipped ? '건너뜀' : _formatDuration(timeSec),
                   style: TextStyle(
-                    color: hasSkipped ? Colors.grey : (timeSec > 300 ? Colors.red : null),
-                    fontWeight: timeSec > 300 ? FontWeight.bold : FontWeight.normal,
+                    color: hasSkipped
+                        ? Colors.grey
+                        : (timeSec > 300 ? Colors.red : null),
+                    fontWeight:
+                        timeSec > 300 ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
               ),
-              
+
               // 채점 버튼 (간단한 SegmentedButton 또는 Row 내 O/X 버튼)
               _OXToggles(qIndex: qIdx),
             ],
@@ -136,11 +149,13 @@ class _OXTogglesState extends State<_OXToggles> {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          icon: Icon(Icons.circle_outlined, color: isCorrect == true ? Colors.green : Colors.grey),
+          icon: Icon(Icons.circle_outlined,
+              color: isCorrect == true ? Colors.green : Colors.grey),
           onPressed: () => setState(() => isCorrect = true),
         ),
         IconButton(
-          icon: Icon(Icons.close, color: isCorrect == false ? Colors.red : Colors.grey),
+          icon: Icon(Icons.close,
+              color: isCorrect == false ? Colors.red : Colors.grey),
           onPressed: () => setState(() => isCorrect = false),
         ),
       ],

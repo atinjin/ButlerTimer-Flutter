@@ -1,0 +1,120 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4051b5",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#14161e",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            min-height: 100dvh;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="flex items-center bg-white dark:bg-slate-900 p-4 border-b border-primary/10 justify-between">
+<div class="text-primary flex size-10 shrink-0 items-center justify-center cursor-pointer hover:bg-primary/10 rounded-full transition-colors">
+<span class="material-symbols-outlined" style="">close</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center" style="">
+                Math Mock Exam 1
+            </h2>
+<div class="size-10 shrink-0"></div> <!-- Spacer for centering -->
+</header>
+<main class="flex-1 flex flex-col items-center px-6 py-8 max-w-2xl mx-auto w-full">
+<!-- Problem Indicator -->
+<div class="mb-8 text-center">
+<span class="text-primary font-semibold uppercase tracking-widest text-sm mb-2 block" style="">Ongoing Session</span>
+<h3 class="text-slate-900 dark:text-slate-100 text-3xl md:text-4xl font-extrabold leading-tight" style="">
+                    Current Problem: 3
+                </h3>
+</div>
+<!-- Timer Component -->
+<div class="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-primary/5 p-8 border border-primary/10 mb-8">
+<div class="flex gap-4 md:gap-6 justify-center">
+<!-- Hours -->
+<div class="flex flex-col items-center gap-2">
+<div class="flex h-20 w-20 md:h-24 md:w-24 items-center justify-center rounded-xl bg-primary/5 dark:bg-primary/20 border-2 border-primary/20">
+<p class="text-primary text-3xl md:text-4xl font-bold" style="">00</p>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-tighter" style="">Hours</p>
+</div>
+<div class="text-primary text-3xl md:text-4xl font-bold self-center -mt-6" style="">:</div>
+<!-- Minutes -->
+<div class="flex flex-col items-center gap-2">
+<div class="flex h-20 w-20 md:h-24 md:w-24 items-center justify-center rounded-xl bg-primary/5 dark:bg-primary/20 border-2 border-primary/20">
+<p class="text-primary text-3xl md:text-4xl font-bold" style="">04</p>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-tighter" style="">Minutes</p>
+</div>
+<div class="text-primary text-3xl md:text-4xl font-bold self-center -mt-6" style="">:</div>
+<!-- Seconds -->
+<div class="flex flex-col items-center gap-2">
+<div class="flex h-20 w-20 md:h-24 md:w-24 items-center justify-center rounded-xl bg-primary/5 dark:bg-primary/20 border-2 border-primary/20">
+<p class="text-primary text-3xl md:text-4xl font-bold" style="">15</p>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-tighter" style="">Seconds</p>
+</div>
+</div>
+</div>
+<!-- Progress Bar Section -->
+<div class="w-full mb-8 space-y-2">
+<div class="h-4 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full transition-all duration-500" style="width: 65%;"></div>
+</div>
+<div class="flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+<span class="" style="">Progress</span>
+<span class="" style="">Estimated Time (min)</span>
+</div>
+</div>
+</main>
+<!-- Navigation Actions at the bottom -->
+<footer class="p-6 w-full max-w-2xl mx-auto space-y-4">
+<div class="grid grid-cols-3 gap-4 w-full">
+<button class="flex flex-col items-center justify-center gap-1 py-4 px-2 rounded-xl bg-white dark:bg-slate-900 border border-primary/10 text-slate-700 dark:text-slate-300 hover:bg-primary/5 transition-colors" style="">
+<span class="material-symbols-outlined text-xl" style="">chevron_left</span>
+<span class="text-[10px] font-bold uppercase" style="">Previous</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 py-4 px-2 rounded-xl bg-white dark:bg-slate-900 border border-primary/10 text-slate-700 dark:text-slate-300 hover:bg-primary/5 transition-colors" style="">
+<span class="material-symbols-outlined text-xl" style="">grid_view</span>
+<span class="text-[10px] font-bold uppercase" style="">Other</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 py-4 px-2 rounded-xl bg-white dark:bg-slate-900 border border-primary/10 text-slate-700 dark:text-slate-300 hover:bg-primary/5 transition-colors" style="">
+<span class="material-symbols-outlined text-xl" style="">chevron_right</span>
+<span class="text-[10px] font-bold uppercase" style="">Next</span>
+</button>
+</div>
+<!-- Primary Action moved to bottom -->
+<div class="w-full pt-2">
+<button class="w-full flex cursor-pointer items-center justify-center overflow-hidden rounded-xl h-16 px-8 bg-primary hover:bg-primary/90 text-white text-lg font-bold transition-all shadow-lg shadow-primary/30 active:scale-[0.98]" style="">
+<span class="truncate" style="">Solved</span>
+</button>
+</div>
+</footer>
+</div>
+</body></html>
